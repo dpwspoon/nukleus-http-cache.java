@@ -298,4 +298,15 @@ public class ProxyCacheSyncIT
     {
         k3po.finish();
     }
+
+    @Test
+    @Specification({
+        "${route}/proxy/controller",
+        "${streams}/polling.different.auth.headers/accept/client",
+        "${streams}/polling.different.auth.headers/connect/server",
+    })
+    public void pollingDifferentAuthHeaders() throws Exception
+    {
+        k3po.finish();
+    }
 }
