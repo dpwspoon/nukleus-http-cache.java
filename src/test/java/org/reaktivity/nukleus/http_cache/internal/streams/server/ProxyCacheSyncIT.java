@@ -137,6 +137,28 @@ public class ProxyCacheSyncIT
     @Test
     @Specification({
         "${route}/proxy/controller",
+        "${streams}/debounce.cache.sync.5.clients/accept/client",
+        "${streams}/debounce.cache.sync.5.clients/connect/server",
+    })
+    public void shouldDebounceCacheSync5Clients() throws Exception
+    {
+        k3po.finish();
+    }
+
+    @Test
+    @Specification({
+        "${route}/proxy/controller",
+        "${streams}/debounce.cache.sync.5.clients.on.already.cached.response/accept/client",
+        "${streams}/debounce.cache.sync.5.clients.on.already.cached.response/connect/server",
+    })
+    public void shouldDebounceCacheSync5ClientsOnAlreadyCachedResponse() throws Exception
+    {
+        k3po.finish();
+    }
+
+    @Test
+    @Specification({
+        "${route}/proxy/controller",
         "${streams}/proxy.request.and.follow.304/accept/client",
         "${streams}/proxy.request.and.follow.304/connect/server",
     })

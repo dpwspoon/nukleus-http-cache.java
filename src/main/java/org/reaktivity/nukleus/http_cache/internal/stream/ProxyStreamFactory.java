@@ -533,6 +533,8 @@ public class ProxyStreamFactory implements StreamFactory
                     final BeginFW begin = beginRO.wrap(buffer, index, index + length);
                     final OctetsFW extension = begin.extension();
                     final HttpBeginExFW httpBeginEx = extension.get(httpBeginExRO::wrap);
+                    System.out.println("HERE");
+                    Thread.dumpStack();
                     final ListFW<HttpHeaderFW> responseHeaders = httpBeginEx.headers();
 
                     this.streamCorrelation = this.junction.getStreamCorrelation();
