@@ -26,6 +26,8 @@ import static org.reaktivity.nukleus.http_cache.internal.stream.util.HttpHeaders
 import static org.reaktivity.nukleus.http_cache.internal.stream.util.HttpHeaders.METHOD;
 import static org.reaktivity.nukleus.http_cache.internal.stream.util.HttpHeaders.STATUS;
 import static org.reaktivity.nukleus.http_cache.internal.stream.util.HttpHeaders.TRANSFER_ENCODING;
+import static org.reaktivity.nukleus.http_cache.internal.stream.util.HttpHeaders.X_HTTP_CACHE_SYNC;
+import static org.reaktivity.nukleus.http_cache.internal.stream.util.HttpHeaders.X_POLL_INJECTED;
 import static org.reaktivity.nukleus.http_cache.internal.stream.util.HttpHeadersUtil.getHeader;
 
 import java.text.SimpleDateFormat;
@@ -57,7 +59,7 @@ public final class HttpCacheUtils
         // utility class
     }
 
-    public static boolean canBeServedByCache(
+    public static boolean requestShouldBypassCache(
         ListFW<HttpHeaderFW> headers)
     {
         return !headers.anyMatch(h ->
@@ -78,6 +80,17 @@ public final class HttpCacheUtils
                     return false;
                 }
         });
+    }
+
+    public static boolean requestWantsResponseOnCacheUpdate(final ListFW<HttpHeaderFW> requestHeaders)
+    {
+        return !requestHeaders.anyMatch(
+                h ->
+                {
+                    String name = h.name().asString();
+                    return  X_POLL_INJECTED.equals(name) ||
+                            X_HTTP_CACHE_SYNC.equals(name);
+                });
     }
 
     public static boolean canInjectPushPromise(

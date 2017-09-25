@@ -15,118 +15,22 @@
  */
 package org.reaktivity.nukleus.http_cache.internal;
 
-import static java.util.Objects.requireNonNull;
-import static org.reaktivity.nukleus.buffer.BufferPool.NO_SLOT;
+import java.util.function.Consumer;
 
-import org.agrona.MutableDirectBuffer;
-import org.reaktivity.nukleus.buffer.BufferPool;
 import org.reaktivity.nukleus.function.MessageConsumer;
-import org.reaktivity.nukleus.http_cache.internal.types.HttpHeaderFW;
-import org.reaktivity.nukleus.http_cache.internal.types.ListFW;
 
 public class Correlation
 {
-    private final int requestURLHash;
-    private final MessageConsumer consumer;
-    private final boolean follow304;
+    private final MessageConsumer messageConsumer;
+    private Consumer<MessageConsumer> connectReplyThrottle;
 
-    private MessageConsumer connectReplyThrottle;
-    private final BufferPool bufferPool;
-    private int requestSlot;
-    private int requestSize;
-    private long connectReplyStreamId;
-    private final String connectName;
-    private final long connectRef;
-
-    // Note: TODO fix hidden/tight coupling on presence of bufferPool,
-    // which is only set in case of fanout.  Thus cleanUp only needs to be
-    // called in case of fanout
     public Correlation(
-        int requestURLHash,
-        MessageConsumer consumer,
-        BufferPool bufferPool,
-        int requestSlot,
-        int requestSize,
-        boolean follow304,
-        String connectName,
-        long connectRef
+       MessageConsumer messageConsumer,
+       Consumer<MessageConsumer> connectThrottle
     )
     {
-        this.requestURLHash = requireNonNull(requestURLHash);
-        this.consumer = consumer;
-        this.bufferPool = bufferPool;
-        this.requestSlot = requestSlot;
-        this.requestSize = requestSize;
-        this.follow304 = follow304;
-        this.connectName = connectName;
-        this.connectRef = connectRef;
-    }
-
-    public int requestURLHash()
-    {
-        return requestURLHash;
-    }
-
-    public ListFW<HttpHeaderFW> requestHeaders(ListFW<HttpHeaderFW> headersRO)
-    {
-        final MutableDirectBuffer buffer = bufferPool.buffer(requestSlot);
-        return headersRO.wrap(buffer, 0, requestSize);
-    }
-
-    public MessageConsumer consumer()
-    {
-        return this.consumer;
-    }
-
-    public void setConnectReplyThrottle(MessageConsumer connectReplyThrottle)
-    {
-        this.connectReplyThrottle = connectReplyThrottle;
-    }
-
-    public MessageConsumer connectReplyThrottle()
-    {
-        return this.connectReplyThrottle;
-    }
-
-    public void connectReplyStreamId(long streamId)
-    {
-        this.connectReplyStreamId = streamId;
-    }
-
-    public long getConnectReplyStreamId()
-    {
-        return this.connectReplyStreamId;
-    }
-
-    public void cleanUp()
-    {
-        bufferPool.release(requestSlot);
-        requestSlot = NO_SLOT;
-    }
-
-    public boolean follow304()
-    {
-        return follow304;
-    }
-
-    public String connectName()
-    {
-        return connectName;
-    }
-
-    public long connectRef()
-    {
-        return connectRef;
-    }
-
-    public int requestSlot()
-    {
-        return requestSlot;
-    }
-
-    public int requestSize()
-    {
-        return requestSize;
+        this.messageConsumer = messageConsumer;
+        this.connectReplyThrottle = connectThrottle;
     }
 
 }
