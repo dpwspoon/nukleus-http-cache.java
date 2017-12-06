@@ -157,7 +157,7 @@ final class ProxyConnectReplyStream
         {
             case DataFW.TYPE_ID:
                 final DataFW data = streamFactory.dataRO.wrap(buffer, index, index + length);
-                request.cache(data, streamFactory.responseBufferPool);
+                request.cache(this.streamFactory.cache, data, streamFactory.responseBufferPool);
                 streamFactory.writer.doWindow(connectReplyThrottle, connectReplyStreamId, length, 0);
                 break;
             case EndFW.TYPE_ID:
@@ -251,7 +251,7 @@ final class ProxyConnectReplyStream
         {
             case DataFW.TYPE_ID:
                 final DataFW data = streamFactory.dataRO.wrap(buffer, index, index + length);
-                request.cache(data, streamFactory.cacheBufferPool);
+                request.cache(this.streamFactory.cache, data, streamFactory.cacheBufferPool);
                 break;
             case EndFW.TYPE_ID:
                 final EndFW end = streamFactory.endRO.wrap(buffer, index, index + length);

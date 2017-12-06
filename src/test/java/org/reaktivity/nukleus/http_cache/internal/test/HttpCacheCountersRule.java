@@ -42,7 +42,6 @@ public class HttpCacheCountersRule implements TestRule
             @Override
             public void evaluate() throws Throwable
             {
-                HttpCacheController controller = controller();
                 base.evaluate();
             }
 

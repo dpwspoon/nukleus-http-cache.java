@@ -129,7 +129,19 @@ public final class CacheEntry
 
     private void sendRefreshRequest()
     {
-        if (this.state != CacheEntryState.PURGED)
+        int newSlot = cache.requestBufferPool.acquire(cachedRequest.requestURLHash());
+        while (newSlot == NO_SLOT)
+        {
+            cache.purgeOld();
+            newSlot = cache.requestBufferPool.acquire(cachedRequest.requestURLHash());
+        }
+
+        // may have purged this
+        if (this.state == CacheEntryState.PURGED)
+        {
+            cache.requestBufferPool.release(newSlot);
+        }
+        else
         {
             MessageConsumer connect = cachedRequest.connect();
             long connectStreamId = cachedRequest.supplyStreamId().getAsLong();
@@ -147,11 +159,7 @@ public final class CacheEntry
             cache.writer.doHttpEnd(connect, connectStreamId);
 
             // duplicate request into new slot (TODO optimize to single request)
-            int newSlot = cache.requestBufferPool.acquire(connectStreamId);
-            if (newSlot == NO_SLOT)
-            {
-                throw new RuntimeException("Cache out of space, please reconfigure");  // TODO reconsider hard fail??
-            }
+
             MutableDirectBuffer newBuffer = cache.requestBufferPool.buffer(newSlot);
             this.cachedRequest.copyRequestTo(newBuffer, cache.cachedResponseBufferPool);
 

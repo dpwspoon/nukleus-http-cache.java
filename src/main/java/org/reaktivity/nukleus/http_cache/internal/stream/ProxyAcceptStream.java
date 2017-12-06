@@ -266,10 +266,10 @@ final class ProxyAcceptStream
     private int storeRequest(final ListFW<HttpHeaderFW> headers)
     {
         this.requestSlot = streamFactory.streamBufferPool.acquire(acceptStreamId);
-        if (requestSlot == NO_SLOT)
+        while (requestSlot == NO_SLOT)
         {
-            send503AndReset();
-            throw new RuntimeException("Cache out of space, please reconfigure");  // TODO reconsider hard fail??
+            this.streamFactory.cache.purgeOld();
+            this.requestSlot = streamFactory.streamBufferPool.acquire(acceptStreamId);
         }
         this.requestSize = 0;
         MutableDirectBuffer requestCacheBuffer = streamFactory.streamBufferPool.buffer(requestSlot);
@@ -279,13 +279,6 @@ final class ProxyAcceptStream
             this.requestSize += h.sizeof();
         });
         return this.requestSize;
-    }
-
-    private void send503AndReset()
-    {
-        streamFactory.writer.doReset(acceptThrottle, acceptStreamId);
-        streamFactory.writer.do503AndAbort(acceptReply, acceptReplyStreamId, acceptCorrelationId);
-        request.purge(streamFactory.requestBufferPool);
     }
 
     private void send504()

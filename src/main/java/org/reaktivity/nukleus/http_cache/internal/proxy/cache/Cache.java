@@ -19,7 +19,6 @@ package org.reaktivity.nukleus.http_cache.internal.proxy.cache;
 import java.util.function.Supplier;
 
 import org.agrona.MutableDirectBuffer;
-import org.agrona.collections.Int2ObjectHashMap;
 import org.agrona.collections.Long2ObjectHashMap;
 import org.reaktivity.nukleus.buffer.BufferPool;
 import org.reaktivity.nukleus.function.MessageConsumer;
@@ -41,7 +40,7 @@ public class Cache
 {
 
     final Writer writer;
-    final Int2ObjectHashMap<CacheEntry> cachedEntries;
+    final Int2CacheHashMapWithLRUEviction cachedEntries;
     final BufferPool cachedRequestBufferPool;
     final BufferPool cachedResponseBufferPool;
     final BufferPool responseBufferPool;
@@ -78,7 +77,7 @@ public class Cache
         this.cachedResponseBufferPool = bufferPool.duplicate();
         this.responseBufferPool = bufferPool.duplicate();
         this.subscriberBufferPool = bufferPool.duplicate();
-        this.cachedEntries = new Int2ObjectHashMap<>();
+        this.cachedEntries = new Int2CacheHashMapWithLRUEviction();
         this.etagSupplier = etagSupplier;
     }
 
@@ -225,6 +224,11 @@ public class Cache
     {
         this.cachedEntries.remove(entry.requestUrl());
         entry.purge();
+    }
+
+    public void purgeOld()
+    {
+        // DPW TODO Auto-generated method stub
     }
 
 }

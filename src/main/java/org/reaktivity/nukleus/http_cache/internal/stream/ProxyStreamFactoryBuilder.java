@@ -43,7 +43,6 @@ public class ProxyStreamFactoryBuilder implements StreamFactoryBuilder
     private MutableDirectBuffer writeBuffer;
     private LongSupplier supplyStreamId;
     private LongSupplier supplyCorrelationId;
-    private Supplier<BufferPool> supplyBufferPool;
     private Slab bufferPool;
     private Cache cache;
 
@@ -103,7 +102,6 @@ public class ProxyStreamFactoryBuilder implements StreamFactoryBuilder
     public StreamFactoryBuilder setBufferPoolSupplier(
         Supplier<BufferPool> supplyBufferPool)
     {
-        this.supplyBufferPool = supplyBufferPool;
         return this;
     }
 
